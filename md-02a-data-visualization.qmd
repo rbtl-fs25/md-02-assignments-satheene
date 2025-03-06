@@ -1,6 +1,6 @@
 ---
 title: "Data Visualisation"
-author: ""
+author: "Satheene Michel"
 format:
   html:
     embed-resources: true
@@ -46,10 +46,10 @@ library(rnaturalearth)
 7.  Render the document and fix any errors.
 
 ```{r}
-#| eval: false
+#| eval: true
  
-gapminder_2007 <- ___ |> 
-  ___(year == 2007) 
+gapminder_2007 <- gapminder |> 
+  filter(year == 2007) 
 ```
 
 ## Task 3: Summarize data for life expectancy by continent
@@ -73,13 +73,13 @@ gapminder_2007 <- ___ |>
 8.  Render the document and fix any errors.
 
 ```{r}
-#| eval: false
+#| eval: true
 
-gapminder_summary_2007 <- ___ |> 
-  group_by(___) |> 
+gapminder_summary_2007 <- gapminder |> 
+  group_by(continent) |> 
   summarise(
     count = n(),
-    lifeExp = median(___)
+    lifeExp = median(lifeExp)
   )
 ```
 
@@ -104,11 +104,13 @@ gapminder_summary_2007 <- ___ |>
 8.  Render the document and fix any errors.
 
 ```{r}
-#| eval: false
+#| eval: true
 
-gapminder_summary_continent_year <- gapminder ___ 
-  group_by(continent, ___) |> 
-  ___(lifeExp = median(lifeExp)) 
+gapminder_summary_continent_year <- gapminder  |>
+  
+  group_by(continent, year) |> 
+  summarise(lifeExp = median(lifeExp)) 
+  
 
 ```
 
@@ -146,7 +148,13 @@ gapminder_summary_continent_year <- read_rds(here::here("data/gapminder-summary-
 5.  What are the data types of the three variables used for aesthetic mappings?
 
 ```{r}
-
+ggplot(data = gapminder_2007,
+       mapping = aes(
+         x = continent,
+         y = lifeExp,
+         fill = continent
+       ))+
+  geom_boxplot(outlier.shap = NA)
 ```
 
 ## Task 7: Create a timeseries plot
@@ -162,7 +170,14 @@ gapminder_summary_continent_year <- read_rds(here::here("data/gapminder-summary-
 3.  Run the code contained in the code chunk and fix any errors.
 
 ```{r}
-
+ggplot(data = gapminder_summary_continent_year,
+       mapping = aes(
+         x = year,
+         y = lifeExp,
+         color = continent
+       ))+
+  geom_line()+
+  geom_point()
 ```
 
 ## Task 8: Create a barplot
@@ -179,6 +194,12 @@ gapminder_summary_continent_year <- read_rds(here::here("data/gapminder-summary-
 3.  Run the code contained in the code chunk and fix any errors.
 
 ```{r}
+ggplot(data = gapminder_summary_2007,
+       mapping = aes(
+         x = continent,
+         y = count
+       ))+
+  geom_col()
 
 ```
 
@@ -194,8 +215,12 @@ gapminder_summary_continent_year <- read_rds(here::here("data/gapminder-summary-
 
 4.  The plot is identical to the plot created with `geom_col()`. Why? What does the `geom_bar()` function do? Write your text here:
 
-```{r}
+    geom_col() uses stat_identity() and thus leaves the data unchanged (use if you want the height of the bars to represent the data), while gem_bar() uses stat_count(), which counts the amounts of cases for the value x (use if you want the height of the bar to respresent the number of cases). In this case they are both the same since the number of cases and the value is the same in terms of count. They are thus in this case basically doing the same.
 
+```{r}
+ggplot(data = gapminder_2007,
+       mapping = aes(x= continent))+
+  geom_bar()
 ```
 
 ## Task 9: Create a histogram
@@ -220,8 +245,16 @@ gapminder_summary_continent_year <- read_rds(here::here("data/gapminder-summary-
 
 7.  What happens by adding the 'breaks' argument? Play around with the numbers inside of `seq()` to see what changes. Describe here what you observe:
 
-```{r}
+    Depending on which of the three values we change in seq() we observe that the first value tells us where the plot starts (x-value), while the second value tells us until where the values are plotted (x-value). The third value gives us the thickness of the bars in the historgram
 
+```{r}
+ggplot(data = gapminder_2007,
+       mapping = aes(
+         x = lifeExp,
+         fill = continent
+       ))+
+  geom_histogram(col = "grey30",
+                 breaks = seq(40,89,2.5))
 ```
 
 ## Task 10: Scatterplot and faceting
@@ -244,7 +277,15 @@ gapminder_summary_continent_year <- read_rds(here::here("data/gapminder-summary-
 7.  Run the code contained in the code chunk and fix any errors.
 
 ```{r}
-
+ggplot(data = gapminder_2007,
+       mapping = aes(
+         x = gdpPercap,
+         y = lifeExp,
+         color = country,
+         size = pop
+       ))+
+  geom_point(show.legend = FALSE)+
+  facet_wrap(~continent)
 ```
 
 ## Task 11: Create a lineplot and use facets
@@ -262,7 +303,7 @@ gapminder_summary_continent_year <- read_rds(here::here("data/gapminder-summary-
 6.  Render the document and fix any errors.
 
 ```{r}
-#| eval: false
+#| eval: true
 
 ggplot(data = gapminder,
        mapping = aes(x = year, 
@@ -271,7 +312,7 @@ ggplot(data = gapminder,
                      color = country)) +
   geom_line(lwd = 1, show.legend = FALSE) + 
   facet_wrap(~continent) +
-  # scale_color_manual(values = country_colors) +
+  scale_color_manual(values = country_colors) +
   theme_minimal() 
 
 ```
@@ -289,9 +330,9 @@ The code chunk below contains code for a world map that shows countries by incom
 3.  Render the document and fix any errors.
 
 ```{r}
-#| eval: false
+#| eval: true
 
-world <- ne_countries(scale = "small", returnclass = "sf")
+world <- ne_countries(scale = "small", returnclass = "sf") #Why do I have to run this one seperately in the console before it works? is this normal?
 
 world |> 
   mutate(income_grp = factor(income_grp, ordered = T)) |> 
